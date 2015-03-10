@@ -32,7 +32,8 @@ The following steps are undertaken:
 - We also **convert the data set to a wide format data set such that each interval is a column** - we use dcast() function from the reshape2 library to do this
 
 
-```{r results="hold"}
+
+```r
 activityData <- read.csv("activity.csv")
 paste("The number of rows is:", nrow(activityData))
 paste("The number of columns is:", ncol(activityData))
@@ -59,7 +60,14 @@ actData$interval <- convertedTimes
 library(reshape2)
 
 actData <- dcast(actData, date~interval, value.var="steps")
+```
 
+```
+## [1] "The number of rows is: 17568"
+```
+
+```
+## [1] "The number of columns is: 3"
 ```
 
 
@@ -69,35 +77,62 @@ In this section, we calculate the total number of steps taken per day. Then we c
 
 Before we undertake this procedure, it might be instructive to see for which dates are all interval values missing. For these dates, sums will be 0.
 
-```{r}
+
+```r
 ## Check which rows(dates) are having only NA values
 
 NAChecker <- !is.na(actData[,-1])
 rowNAFull <- which(rowSums(NAChecker)==0)
 rowNAFull ## Prints the row numbers with all NA values
+```
+
+```
+## [1]  1  8 32 35 40 41 45 61
+```
+
+```r
 actData[[1]][rowNAFull] ## Prints the dates for which values are all NA
+```
 
+```
+## [1] "2012-10-01" "2012-10-08" "2012-11-01" "2012-11-04" "2012-11-09"
+## [6] "2012-11-10" "2012-11-14" "2012-11-30"
+```
 
+```r
 ## Calculate total steps per day, and the mean and median of total steps per day
 
 Totals <- rowSums(actData[,-1], na.rm=TRUE)
 paste("The mean number of steps taken per day is:",
       round(mean(Totals),2))
+```
+
+```
+## [1] "The mean number of steps taken per day is: 9354.23"
+```
+
+```r
 paste("The median number of steps taken per day is:",
       round(median(Totals),2))
+```
 
+```
+## [1] "The median number of steps taken per day is: 10395"
 ```
 
 
 Next, we construct the histogram, and we observe that on average, the person in the study walked around 9000 steps per day for the period under consideration.
 
 
-```{r histTotalSteps}
+
+```r
 hist(Totals, col="blue", breaks=5,
                    xlab="Number of steps", ylab ="Number of days",
                    main="Histogram of Steps taken per day")
 abline (v=mean(Totals), lwd=5, col="black")
 ```
+
+![plot of chunk histTotalSteps](figure/histTotalSteps.png) 
 
 
 ## Average daily activity pattern
@@ -106,17 +141,20 @@ In this part of the exercise, we compute the mean values of steps taken in each 
 
 Then we will construct a time series plot. For the x-axis of the plot, we will use the numbers 1 to 288 with 1 representing the interval starting at 00:00 hrs, and 288 representing the interval starting at 23:55 hours.
 
-```{r intervalMeans}
+
+```r
 intervalMeans <- colMeans(actData[,-1], na.rm=TRUE)
 plot(1:288, intervalMeans, col="red", lwd=2, type="l",
      xlab="Interval", ylab="Mean Steps in Interval", 
      main="Time Series plot for Interval Mean Steps")
-
 ```
+
+![plot of chunk intervalMeans](figure/intervalMeans.png) 
 
 Here, we will also compute the interval containing the highest number of mean steps. 
 
-```{r results="hold"}
+
+```r
 index <- which.max(intervalMeans)
 paste("Interval with highest mean steps is:",colnames(actData)[1+index])
 
@@ -125,7 +163,14 @@ paste("Interval with highest mean steps is:",colnames(actData)[1+index])
 ## marked 1:288, we might be interested in the interval sequence number
 
 paste("Interval sequence (order) with highest mean is:",index)
+```
 
+```
+## [1] "Interval with highest mean steps is: 08:35"
+```
+
+```
+## [1] "Interval sequence (order) with highest mean is: 104"
 ```
 
 As can be seen, the interval of 5 minutes starting at 8:35 AM has the maximum number of mean steps when the mean is calculated across all days in the data set.
@@ -141,7 +186,8 @@ In the imputed data set, totals for those dates where there are any NA values wi
 As for the median, there are 8 days for which there is no data. The total of the values for each of these days will be the same after imputation. It is observed that the median value after imputation equals to this common value. Also, the median with imputed values is higher than the median without imputation.
 
 
-```{r results="hold"}
+
+```r
 ## Print the number of NAs in the original data set
 
 paste("The total NAs in the original data set is:",
@@ -167,17 +213,31 @@ paste("The mean number of steps taken per day is:",
       round(mean(Totals),2))
 paste("The median number of  taken per day is:", 
       round(median(Totals),2))
+```
 
+```
+## [1] "The total NAs in the original data set is: 2304"
+```
+
+```
+## [1] "The mean number of steps taken per day is: 10766.19"
+```
+
+```
+## [1] "The median number of  taken per day is: 10766.19"
 ```
 
 We can now plot a histogram of the total steps per day based on the imputed values. We can see that, on average, the total number of steps per day has gone up to around 11000 (it was around 9000 earlier without imputation)
 
-```{r histTotalStepswithImputation}
+
+```r
 hist(Totals, col="blue", breaks=5,
                    xlab="Number of steps", ylab ="Number of days",
                    main="Histogram of Steps taken per day")
 abline (v=mean(Totals), lwd=5, col="black")
 ```
+
+![plot of chunk histTotalStepswithImputation](figure/histTotalStepswithImputation.png) 
 
 
 ## Activity Patterns on Weekdays and Weekends
@@ -188,7 +248,8 @@ The illustrative graph shown in the exercise for this part is a lattice plot. A 
 
 
 
-```{r intervalMeansImputedPanelPlot}
+
+```r
 library(lubridate)
 
 ## Adding a variable for day of the week
@@ -208,8 +269,9 @@ xyplot(intervalMeans~intervalNumber | DayofWeek, data=imputedData,
        layout = c(1,2), type="l", col="blue", lwd=2,
        xlab="Interval",ylab="Mean steps in Interval",
        main="Time Series plot for Interval Mean Steps")
-
 ```
+
+![plot of chunk intervalMeansImputedPanelPlot](figure/intervalMeansImputedPanelPlot.png) 
 
 
 
